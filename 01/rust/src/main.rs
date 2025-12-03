@@ -3,12 +3,16 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 fn main() {
-    let mut infile = BufReader::new(File::open("../input").unwrap());
-    let part1_answer = solve(&mut infile, &Part::One);
+    let infile = BufReader::new(File::open("../input").unwrap());
+    let lines = infile
+        .lines()
+        .map(|res| res.unwrap())
+        .collect::<Vec<String>>();
+
+    let part1_answer = solve(&lines, &Part::One);
     println!("Part 1: password = {part1_answer}");
 
-    infile = BufReader::new(File::open("../input").unwrap());
-    let part2_answer = solve(&mut infile, &Part::Two);
+    let part2_answer = solve(&lines, &Part::Two);
     println!("Part 2: password = {part2_answer}");
 }
 
@@ -17,12 +21,11 @@ enum Part {
     Two,
 }
 
-fn solve(reader: &mut impl BufRead, part: &Part) -> u32 {
+fn solve(lines: &[String], part: &Part) -> u32 {
     let mut zeros = 0;
     let mut pos = 50;
 
-    for line in reader.lines() {
-        let line = line.unwrap();
+    for line in lines {
         let (dir, count) = line.split_at(1);
         let add = count.parse::<i32>().unwrap() * if dir == "L" { -1 } else { 1 };
 
