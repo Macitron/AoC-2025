@@ -4,15 +4,19 @@ use std::io::{BufRead, BufReader};
 
 fn main() {
     let infile = BufReader::new(File::open("../input").unwrap());
-    let lines = infile
+    let turns = infile
         .lines()
         .map(|res| res.unwrap())
-        .collect::<Vec<String>>();
+        .map(|line| {
+            let (dir, count) = line.split_at(1);
+            count.parse::<i32>().unwrap() * if dir == "L" { -1 } else { 1 }
+        })
+        .collect::<Vec<i32>>();
 
-    let part1_answer = solve(&lines, &Part::One);
+    let part1_answer = solve(&turns, &Part::One);
     println!("Part 1: password = {part1_answer}");
 
-    let part2_answer = solve(&lines, &Part::Two);
+    let part2_answer = solve(&turns, &Part::Two);
     println!("Part 2: password = {part2_answer}");
 }
 
@@ -21,21 +25,18 @@ enum Part {
     Two,
 }
 
-fn solve(lines: &[String], part: &Part) -> u32 {
+fn solve(turns: &[i32], part: &Part) -> u32 {
     let mut zeros = 0;
     let mut pos = 50;
 
-    for line in lines {
-        let (dir, count) = line.split_at(1);
-        let add = count.parse::<i32>().unwrap() * if dir == "L" { -1 } else { 1 };
-
+    for &turn in turns {
         zeros += match part {
             Part::One => {
-                let new_pos = (pos + add).rem_euclid(100);
+                let new_pos = (pos + turn).rem_euclid(100);
                 u32::from(new_pos == 0)
             }
             Part::Two => {
-                let raw_sum = pos + add;
+                let raw_sum = pos + turn;
                 match raw_sum.cmp(&0) {
                     Ordering::Greater => (raw_sum / 100).unsigned_abs(),
                     Ordering::Equal => 1,
@@ -43,7 +44,7 @@ fn solve(lines: &[String], part: &Part) -> u32 {
                 }
             }
         };
-        pos = (pos + add).rem_euclid(100);
+        pos = (pos + turn).rem_euclid(100);
     }
 
     zeros
